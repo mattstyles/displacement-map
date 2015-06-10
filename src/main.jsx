@@ -4,7 +4,7 @@ import './utils/font'
 import React from 'react'
 
 import dispatcher from './dispatchers/appDispatcher'
-import MyComponent from 'myComponent'
+import DisplacementMap from 'displacementMap'
 
 class App extends React.Component {
     constructor() {
@@ -15,7 +15,7 @@ class App extends React.Component {
         return (
             <div className="container">
                 <h1>Hello React</h1>
-                <MyComponent />
+                <DisplacementMap />
             </div>
         )
     }
