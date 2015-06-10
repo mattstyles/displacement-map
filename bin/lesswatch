@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+
+var fs = require( 'fs' )
+var path = require( 'path' )
+
+var chokidar = require( 'chokidar' )
+var argv = require( 'minimist' )( process.argv.slice( 2 ) )
+var chalk = require( 'chalk' )
+
+var Ho = require( 'ho-compiler' )
+var Autoprefixer = require( 'autoprefixer-transform' )
+var Conformance = require( 'ho-conformance' )
+
+
+/**
+ * -e _Required_ main entry point e.g. ./src/styles.less
+ * -o _optional_ output file e.g. ./public/styles.css - if omitted will pipe to stdout
+ * -c _optional_ compression flag
+ * _ _Required_ glob to watch
+ */
+// @example
+// ./lesswatch ./src/**/glob-pattern*.less -i ./src/main.less -o ./public/main.css
+// ./lesswatch ./src/**/*.less -i ./src/styles.less --suppress-output > ./public/styles.css
+
+
+
+function log() {
+    if ( argv[ 'suppress-output' ] ) {
+        return
+    }
+
+    process.stdout.write( chalk.grey( '  [ho] ' ) )
+    console.log.apply( console, arguments )
+}
+
+function compile() {
+    // Create new streams
+    var ho = new Ho({
+        filename: argv.e,
+        paths: [
+            './src/',
+            './node_modules',
+            './src/core/styles'
+        ],
+        compress: argv.c,
+        sourceMap: false
+    })
+
+
+    ho.on( 'error', function( err ) {
+        log( chalk.red( 'error' ), err )
+    })
+
+    var autoprefixer = new Autoprefixer({
+        browsers: [ 'last 2 versions' ]
+    })
+
+    var conformance = new Conformance({
+        entry: argv.e,
+        paths: [
+            './src'
+        ]
+    })
+
+    conformance.on( 'error', function( err ) {
+        log( chalk.red( 'conformance error' ), err )
+    })
+
+    var rs = argv.e ? fs.createReadStream( argv.e ) : process.stdin
+    var ws = argv.o ? fs.createWriteStream( argv.o ) : process.stdout
+
+    // Create transform pipeline
+    log( chalk.green( 'write' ), argv.o )
+
+    rs.pipe( ho ).pipe( autoprefixer ).pipe( ws )
+}
+
+compile()
+
+var watcher = chokidar.watch( argv._ )
+    .on( 'change', function( filepath ) {
+        log( chalk.yellow( 'change' ), filepath )
+        compile()
+    })
+    .on( 'ready', function() {
+        var filepath = ''
+        // List watched files
+        Object.keys( watcher._watched ).forEach( function( key ) {
+            Object.keys( watcher._watched[ key ]._items ).forEach( function( item ) {
+                filepath = path.join( key, item )
+                log( chalk.cyan( 'watch' ), filepath.replace( process.env.PWD + '/', '' ) )
+            })
+        })
+    })
