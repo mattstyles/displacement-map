@@ -1,7 +1,7 @@
 import path from 'path'
 import tape from 'tape'
 
-import { clamp, wrap } from '../maths'
+import { clamp, wrap, random } from '../maths'
 
 
 tape( 'Clamp :: ' + path.basename( __filename ), t => {
