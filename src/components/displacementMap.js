@@ -1,6 +1,5 @@
 import rnd from 'lodash.random'
-import { clamp, wrap } from '../utils/maths'
-
+import { clamp, wrap } from 'utils/maths'
 
 
 export default class DisplacementMap {
@@ -10,7 +9,8 @@ export default class DisplacementMap {
             gridSize: 65,
             roughness: 1.25,
             useWrap: false,
-            smooth: false
+            smooth: false,
+            seed: []
         }, options )
 
 
@@ -25,24 +25,9 @@ export default class DisplacementMap {
             this.grid.push( row )
         }
 
-        // // Seed corners
-        // this.grid[ 0 ][ 0 ] = 1
-        // this.grid[ this.opts.gridSize - 1 ][ 0 ] = 1
-        // this.grid[ this.opts.gridSize - 1 ][ this.opts.gridSize - 1 ] = 1
-        // this.grid[ 0 ][ this.opts.gridSize - 1 ] = 1
-        //
-        // // Seed center point
-        // this.grid[ ( this.opts.gridSize - 1 ) / 2 ][ ( this.opts.gridSize - 1 ) / 2 ] = -1
-        //
-        // // Seed vertical stripe
-        // let midx = ( this.opts.gridSize - 1 ) / 2
-        // for ( let y = 0; y < this.opts.gridSize; y++ ) {
-        //     // this.grid[ midx - 2 ][ y ] = -1
-        //     this.grid[ midx - 1 ][ y ] = rnd( -1, -.85, true )
-        //     this.grid[ midx ][ y ] = rnd( -1, -.85, true )
-        //     this.grid[ midx - 1 ][ y ] = rnd( -1, -.85, true )
-        //     // this.grid[ midx - 2 ][ y ] = -1
-        // }
+        this.opts.seed.forEach( cell => {
+            this.grid[ cell.x ][ cell.y ] = cell.value
+        })
     }
 
 

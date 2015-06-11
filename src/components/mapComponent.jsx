@@ -1,16 +1,13 @@
 
 import React from 'react'
 import classnames from 'classnames'
-import rnd from 'lodash.random'
-
-import { clamp, wrap } from 'utils/maths'
-
 import DisplacementMap from './displacementMap'
 
+import { clamp } from 'utils/maths'
 
 export default class MapComponent extends React.Component {
     static defaultProps = {
-        size: 65 * 4,
+        size: 65 * 8,
         gridSize: 65,
         roughness: 1.25,
         useWrap: false,
@@ -23,13 +20,32 @@ export default class MapComponent extends React.Component {
         this.mounted = false
         this.cellSize = this.props.size / this.props.gridSize
 
-        this.map = new DisplacementMap( this.props )
+        this.map = new DisplacementMap( Object.assign({
+            seed: [
+                { x: 0, y: 0, value: 1 },
+                { x: this.props.gridSize - 1, y: 0, value: 1 },
+                { x: this.props.gridSize - 1, y: this.props.gridSize - 1, value: 1 },
+                { x: 0, y: this.props.gridSize - 1, value: -1 }
+            ]
+        }, this.props ))
+        this.map.generate( 1 )
 
-        // Seed map
-        this.map.grid[ 0 ][ 0 ] = 1
-        this.map.grid[ this.props.gridSize - 1 ][ 0 ] = 1
-        this.map.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 0
-        this.map.grid[ 0 ][ this.props.gridSize - 1 ] = -1
+        let right = []
+        for ( let y = 0; y < this.props.gridSize; y++ ) {
+            right.push({
+                x: 0,
+                y: y,
+                value: this.map.grid[ this.props.gridSize - 1 ][ y ]
+            })
+        }
+
+        right.push( { x: this.props.gridSize - 1, y: 0, value: 0 } )
+        right.push( { x: this.props.gridSize - 1, y: this.props.gridSize - 1, value: 0 } )
+
+        this.map2 = new DisplacementMap( Object.assign({
+            seed: right
+        }, this.props ))
+        this.map2.generate( 1 )
     }
 
     get ctx() {
@@ -45,7 +61,7 @@ export default class MapComponent extends React.Component {
         this.canvas = React.findDOMNode( this )
 
         //this.generate( 0, 0, this.props.gridSize - 1, this.props.gridSize - 1, 1 )
-        this.map.generate( 1 )
+        //this.map.generate( 1 )
         this.renderGrid()
     }
 
@@ -70,7 +86,7 @@ export default class MapComponent extends React.Component {
         this.ctx.clearRect( 0, 0, this.props.size, this.props.size )
     }
 
-    drawCell( x, y, cell ) {
+    drawCell( x, y, cell, start ) {
         let x1 = clamp({ num: x, max: this.props.gridSize - 1 })
         let y1 = clamp({ num: y, max: this.props.gridSize - 1 })
 
@@ -79,14 +95,21 @@ export default class MapComponent extends React.Component {
         if ( cell === null ) {
             this.ctx.fillStyle = 'rgb(64,0,0)'
         }
-        this.ctx.fillRect( x1 * this.cellSize, y1 * this.cellSize, this.cellSize, this.cellSize )
+        this.ctx.fillRect( start + x1 * this.cellSize, y1 * this.cellSize, this.cellSize, this.cellSize )
     }
 
     renderGrid() {
         this.clear()
+        this.cellSize = 4
         this.map.grid.forEach( ( row, x ) => {
             row.forEach( ( cell, y ) => {
-                this.drawCell( x, y, cell )
+                this.drawCell( x, y, cell, 0 )
+                //console.log( x, y, cell.toFixed( 2 ) )
+            })
+        })
+        this.map2.grid.forEach( ( row, x ) => {
+            row.forEach( ( cell, y ) => {
+                this.drawCell( x, y, cell, 260 )
                 //console.log( x, y, cell.toFixed( 2 ) )
             })
         })
