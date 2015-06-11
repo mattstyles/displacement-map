@@ -8,8 +8,8 @@ import { clamp, wrap } from 'utils/maths'
 
 export default class DisplacementMap extends React.Component {
     static defaultProps = {
-        size: 129 * 5,
-        gridSize: 129
+        size: 257 * 2,
+        gridSize: 257
     }
 
     constructor( props ) {
@@ -29,10 +29,10 @@ export default class DisplacementMap extends React.Component {
         }
 
         // Seed corners
-        this.grid[ 0 ][ 0 ] = 0
-        this.grid[ 0 ][ this.props.gridSize - 1 ] = 0
-        this.grid[ this.props.gridSize - 1 ][ 0 ] = 0
-        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 0
+        this.grid[ 0 ][ 0 ] = 1
+        this.grid[ this.props.gridSize - 1 ][ 0 ] = -1
+        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = -1
+        this.grid[ 0 ][ this.props.gridSize - 1 ] = 1
 
         // Seed center point
         // this.grid[ ( this.props.gridSize - 1 ) / 2 ][ ( this.props.gridSize - 1 ) / 2 ] = 1
@@ -67,7 +67,10 @@ export default class DisplacementMap extends React.Component {
      *-----------------------------------------------------------*/
 
     random( gen ) {
-        return 0 + ( rnd( -1, 1, true ) * gen )
+        // return 0 + ( rnd( -1, 1, true ) * gen )
+
+        // No randomness
+        return 0
     }
 
     wrap( num ) {
@@ -78,7 +81,26 @@ export default class DisplacementMap extends React.Component {
         })
     }
 
-    getAverage( x, y, size ) {
+    clamp( num ) {
+        return clamp({
+            num: num,
+            min: 0,
+            max: this.props.gridSize - 1
+        })
+    }
+
+    getSquareAverage( x1, y1, x2, y2 ) {
+        // top left, top right, bottom right, bottom left
+        return (
+            this.getCell( x1, y1 ) +
+            this.getCell( x2, y1 ) +
+            this.getCell( x2, y2 ) +
+            this.getCell( x1, y2 )
+        ) / 4
+    }
+
+    getDiamondAverage( x, y, size ) {
+        // left, right, top, bottom
         return (
             this.getCell( x - size, y ) +
             this.getCell( x + size, y ) +
@@ -88,13 +110,15 @@ export default class DisplacementMap extends React.Component {
     }
 
     getCell( x, y ) {
-        let cell = this.grid[ this.wrap( x ) ][ this.wrap( y ) ]
+        //let cell = this.grid[ this.wrap( x ) ][ this.wrap( y ) ]
+        let cell = this.grid[ this.clamp( x ) ][ this.clamp( y ) ]
 
         return cell || 0
     }
 
     setCell( x, y, value ) {
-        this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
+        // this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
+        this.grid[ this.clamp( x ) ][ this.clamp( y ) ] = value
     }
 
     generate( step ) {
@@ -127,9 +151,12 @@ export default class DisplacementMap extends React.Component {
             x: x1 + size,
             y: y1 + size
         }
-        let avg = this.getAverage( mid.x, mid.y, size )
+        // let avg = this.getAverage( mid.x, mid.y, size )
+        let avg = this.getSquareAverage( x1, y1, x2, y2 )
         //console.log( 'gen:square', x1, y1, x2, y2, mid.x, mid.y, size, ( avg + this.random( step ) ).toFixed( 2 ) )
-        this.setCell( mid.x, mid.y, avg + this.random( step ) )
+        // this.setCell( mid.x, mid.y, avg + this.random( step ) )
+
+        this.setCell( mid.x, mid.y, avg )
     }
 
     generateDiamond( x1, y1, x2, y2, step ) {
@@ -141,10 +168,10 @@ export default class DisplacementMap extends React.Component {
 
         //console.log( 'gen:diamond', x1, y1, x2, y2 )
 
-        this.setCell( x1 + size, y1, this.getAverage( x1 + size, y1, size ) + this.random( step ) )
-        this.setCell( x2, y1 + size, this.getAverage( x2, y1 + size, size ) + this.random( step ) )
-        this.setCell( x1 + size, y2, this.getAverage( x1 + size, y2, size ) + this.random( step ) )
-        this.setCell( x1, y1 + size, this.getAverage( x1, y1 + size, size ) + this.random( step ) )
+        this.setCell( x1 + size, y1, this.getDiamondAverage( x1 + size, y1, size ) + this.random( step ) )
+        this.setCell( x2, y1 + size, this.getDiamondAverage( x2, y1 + size, size ) + this.random( step ) )
+        this.setCell( x1 + size, y2, this.getDiamondAverage( x1 + size, y2, size ) + this.random( step ) )
+        this.setCell( x1, y1 + size, this.getDiamondAverage( x1, y1 + size, size ) + this.random( step ) )
 
     }
 
@@ -182,6 +209,7 @@ export default class DisplacementMap extends React.Component {
         this.grid.forEach( ( row, x ) => {
             row.forEach( ( cell, y ) => {
                 this.drawCell( x, y, cell )
+                // console.log( x, y, cell.toFixed( 2 ) )
             })
         })
     }
