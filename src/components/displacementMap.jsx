@@ -39,6 +39,16 @@ export default class DisplacementMap extends React.Component {
 
         // Seed center point
         this.grid[ ( this.props.gridSize - 1 ) / 2 ][ ( this.props.gridSize - 1 ) / 2 ] = -1
+
+        // Seed vertical stripe
+        let midx = ( this.props.gridSize - 1 ) / 2
+        for ( let y = 0; y < this.props.gridSize; y++ ) {
+            this.grid[ midx - 2 ][ y ] = -1
+            this.grid[ midx - 1 ][ y ] = -1
+            this.grid[ midx ][ y ] = -1
+            this.grid[ midx - 1 ][ y ] = -1
+            this.grid[ midx - 2 ][ y ] = -1
+        }
     }
 
     get ctx() {
