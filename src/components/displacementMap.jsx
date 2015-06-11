@@ -8,9 +8,9 @@ import { clamp, wrap } from 'utils/maths'
 
 export default class DisplacementMap extends React.Component {
     static defaultProps = {
-        size: 513,
-        gridSize: 513,
-        roughness: 6.5,
+        size: 129 * 5,
+        gridSize: 129,
+        roughness: 2.5,
         useWrap: false,
         smooth: false
     }
@@ -33,12 +33,12 @@ export default class DisplacementMap extends React.Component {
 
         // Seed corners
         this.grid[ 0 ][ 0 ] = 1
-        this.grid[ this.props.gridSize - 1 ][ 0 ] = 0
-        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 0
+        this.grid[ this.props.gridSize - 1 ][ 0 ] = 1
+        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 1
         this.grid[ 0 ][ this.props.gridSize - 1 ] = 1
 
         // Seed center point
-        // this.grid[ ( this.props.gridSize - 1 ) / 2 ][ ( this.props.gridSize - 1 ) / 2 ] = 1
+        this.grid[ ( this.props.gridSize - 1 ) / 2 ][ ( this.props.gridSize - 1 ) / 2 ] = -1
     }
 
     get ctx() {
@@ -141,6 +141,10 @@ export default class DisplacementMap extends React.Component {
     }
 
     setCell( x, y, value ) {
+        if ( this.getCell( x, y ) !== null ) {
+            return
+        }
+
         this.props.useWrap === true
             ? this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
             : this.grid[ this.clamp( x ) ][ this.clamp( y ) ] = value
