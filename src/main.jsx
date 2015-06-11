@@ -14,7 +14,6 @@ class App extends React.Component {
     render() {
         return (
             <div className="container">
-                <h1>Midpoint Displacement Mapping</h1>
                 <DisplacementMap />
             </div>
         )

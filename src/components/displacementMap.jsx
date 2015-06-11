@@ -8,8 +8,8 @@ import { clamp, wrap } from 'utils/maths'
 
 export default class DisplacementMap extends React.Component {
     static defaultProps = {
-        size: 660,
-        gridSize: 33
+        size: 129 * 5,
+        gridSize: 129
     }
 
     constructor( props ) {
@@ -51,8 +51,6 @@ export default class DisplacementMap extends React.Component {
         this.canvas = React.findDOMNode( this )
 
         //this.generate( 0, 0, this.props.gridSize - 1, this.props.gridSize - 1, 1 )
-        // Seed center point so diamond and square generation occur at the same time, so,
-        // start one generation later
         this.generate( 1 )
         this.renderGrid()
     }
@@ -136,6 +134,10 @@ export default class DisplacementMap extends React.Component {
 
     generateDiamond( x1, y1, x2, y2, step ) {
         let size = ( x2 - x1 ) / 2
+        let mid = {
+            x: x1 + size,
+            y: y1 + size
+        }
 
         //console.log( 'gen:diamond', x1, y1, x2, y2 )
 
@@ -143,6 +145,7 @@ export default class DisplacementMap extends React.Component {
         this.setCell( x2, y1 + size, this.getAverage( x2, y1 + size, size ) + this.random( step ) )
         this.setCell( x1 + size, y2, this.getAverage( x1 + size, y2, size ) + this.random( step ) )
         this.setCell( x1, y1 + size, this.getAverage( x1, y1 + size, size ) + this.random( step ) )
+
     }
 
 
