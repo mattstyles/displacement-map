@@ -76,7 +76,7 @@ export default class DisplacementMap extends React.Component {
         return wrap({
             num: num,
             min: 0,
-            max: this.props.gridSize
+            max: this.props.gridSize - 1
         })
     }
 
@@ -135,7 +135,14 @@ export default class DisplacementMap extends React.Component {
     }
 
     generateDiamond( x1, y1, x2, y2, step ) {
-        let size = ( x2 - x1 ) / 4
+        let size = ( x2 - x1 ) / 2
+
+        //console.log( 'gen:diamond', x1, y1, x2, y2 )
+
+        this.setCell( x1 + size, y1, this.getAverage( x1 + size, y1, size ) + this.random( step ) )
+        this.setCell( x2, y1 + size, this.getAverage( x2, y1 + size, size ) + this.random( step ) )
+        this.setCell( x1 + size, y2, this.getAverage( x1 + size, y2, size ) + this.random( step ) )
+        this.setCell( x1, y1 + size, this.getAverage( x1, y1 + size, size ) + this.random( step ) )
     }
 
 
