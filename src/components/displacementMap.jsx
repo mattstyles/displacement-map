@@ -23,10 +23,19 @@ export default class DisplacementMap extends React.Component {
         for ( let i = 0; i < this.props.gridSize; i++ ) {
             let row = []
             for ( let j = 0; j < this.props.gridSize; j++ ) {
-                row.push( 0 )
+                row.push( null )
             }
             this.grid.push( row )
         }
+
+        // Seed corners
+        this.grid[ 0 ][ 0 ] = 0
+        this.grid[ 0 ][ this.props.gridSize - 1 ] = 0
+        this.grid[ this.props.gridSize - 1 ][ 0 ] = 0
+        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 0
+
+        // Seed center point
+        // this.grid[ ( this.props.gridSize - 1 ) / 2 ][ ( this.props.gridSize - 1 ) / 2 ] = 1
     }
 
     get ctx() {
@@ -41,7 +50,10 @@ export default class DisplacementMap extends React.Component {
         this.mounted = true
         this.canvas = React.findDOMNode( this )
 
-        this.generate( 0, 0, this.props.gridSize - 1, this.props.gridSize - 1, 1 )
+        //this.generate( 0, 0, this.props.gridSize - 1, this.props.gridSize - 1, 1 )
+        // Seed center point so diamond and square generation occur at the same time, so,
+        // start one generation later
+        this.generate( 1 )
         this.renderGrid()
     }
 
@@ -69,7 +81,12 @@ export default class DisplacementMap extends React.Component {
     }
 
     getAverage( x, y, size ) {
-        return ( wrap( x - size ) + wrap( x + size ) + wrap( y - size ) + wrap( y + size ) ) / 4
+        return (
+            this.getCell( x - size, y ) +
+            this.getCell( x + size, y ) +
+            this.getCell( x, y - size ) +
+            this.getCell( x, y + size )
+        ) / 4
     }
 
     getCell( x, y ) {
@@ -82,34 +99,43 @@ export default class DisplacementMap extends React.Component {
         this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
     }
 
-    generate( x1, y1, x2, y2, gen ) {
-        console.log( 'generation:', gen )
-        this.generateSquare( x1, y1, x2, y2, 1 / gen )
-        this.recurse( x1, y1, x2, y2, gen + 1 )
-    }
+    generate( step ) {
+        console.log( '  step:', step )
 
-    recurse( x1, y1, x2, y2, gen ) {
-        let dist = ( x2 - x1 ) / 2
+        let dist = ( this.props.gridSize - 1 ) * step
 
-        if ( dist >= 2 ) {
-            this.generate( x1, y1, x1 + dist, y1 + dist, gen )
-            this.generate( x1 + dist, y1, x2, y1 + dist, gen )
-            this.generate( x1, y1 + dist, x1 + dist, y2, gen )
-            this.generate( x1 + dist, y1 + dist, x2, y2, gen )
+        // Square pass
+        for ( let x = 0; x < this.props.gridSize - 1; x += dist ) {
+            for ( let y = 0; y < this.props.gridSize - 1; y += dist) {
+                this.generateSquare( x, y, x + dist, y + dist, step )
+            }
+        }
+
+        // Diamond pass
+        for ( let x = 0; x < this.props.gridSize - 1; x += dist ) {
+            for ( let y = 0; y < this.props.gridSize - 1; y += dist) {
+                this.generateDiamond( x, y, x + dist, y + dist, step )
+            }
+        }
+
+        if ( dist > 2 ) {
+            this.generate( step / 2 )
         }
     }
 
-    generateSquare( x1, y1, x2, y2, gen ) {
+    generateSquare( x1, y1, x2, y2, step ) {
         let size = ( x2 - x1 ) / 2
         let mid = {
             x: x1 + size,
             y: y1 + size
         }
         let avg = this.getAverage( mid.x, mid.y, size )
-        // console.log( gen, mid.x, mid.y, ( avg + this.random( gen ) ).toFixed( 2 ) )
-        this.setCell( mid.x, mid.y, avg + this.random( gen ) )
+        //console.log( 'gen:square', x1, y1, x2, y2, mid.x, mid.y, size, ( avg + this.random( step ) ).toFixed( 2 ) )
+        this.setCell( mid.x, mid.y, avg + this.random( step ) )
+    }
 
-        // this.recurse( x1, y1, x2, y2, gen )
+    generateDiamond( x1, y1, x2, y2, step ) {
+        let size = ( x2 - x1 ) / 4
     }
 
 
@@ -135,7 +161,7 @@ export default class DisplacementMap extends React.Component {
 
         this.ctx.fillStyle = this.lerpColor( cell )  // @TODO lerp grid value using cell param
 
-        if ( cell === 0 ) {
+        if ( cell === null ) {
             this.ctx.fillStyle = 'rgb(64,0,0)'
         }
         this.ctx.fillRect( x1 * this.cellSize, y1 * this.cellSize, this.cellSize, this.cellSize )
