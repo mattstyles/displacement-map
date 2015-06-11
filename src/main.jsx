@@ -4,7 +4,7 @@ import './utils/font'
 import React from 'react'
 
 import dispatcher from './dispatchers/appDispatcher'
-import DisplacementMap from 'displacementMap'
+import MapComponent from 'mapComponent'
 
 class App extends React.Component {
     constructor() {
@@ -14,7 +14,7 @@ class App extends React.Component {
     render() {
         return (
             <div className="container">
-                <DisplacementMap />
+                <MapComponent />
             </div>
         )
     }
