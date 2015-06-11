@@ -8,8 +8,11 @@ import { clamp, wrap } from 'utils/maths'
 
 export default class DisplacementMap extends React.Component {
     static defaultProps = {
-        size: 257 * 2,
-        gridSize: 257
+        size: 513,
+        gridSize: 513,
+        roughness: 6.5,
+        useWrap: false,
+        smooth: false
     }
 
     constructor( props ) {
@@ -30,8 +33,8 @@ export default class DisplacementMap extends React.Component {
 
         // Seed corners
         this.grid[ 0 ][ 0 ] = 1
-        this.grid[ this.props.gridSize - 1 ][ 0 ] = -1
-        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = -1
+        this.grid[ this.props.gridSize - 1 ][ 0 ] = 0
+        this.grid[ this.props.gridSize - 1 ][ this.props.gridSize - 1 ] = 0
         this.grid[ 0 ][ this.props.gridSize - 1 ] = 1
 
         // Seed center point
@@ -67,10 +70,10 @@ export default class DisplacementMap extends React.Component {
      *-----------------------------------------------------------*/
 
     random( gen ) {
-        // return 0 + ( rnd( -1, 1, true ) * gen )
-
-        // No randomness
-        return 0
+        // Returning 0 creates no random variance
+        return this.props.smooth
+            ? 0
+            : 0 + ( rnd( -1, 1, true ) * gen * this.props.roughness )
     }
 
     wrap( num ) {
@@ -91,34 +94,56 @@ export default class DisplacementMap extends React.Component {
 
     getSquareAverage( x1, y1, x2, y2 ) {
         // top left, top right, bottom right, bottom left
-        return (
-            this.getCell( x1, y1 ) +
-            this.getCell( x2, y1 ) +
-            this.getCell( x2, y2 ) +
+        let valid = 0
+        let points = [
+            this.getCell( x1, y1 ),
+            this.getCell( x2, y1 ),
+            this.getCell( x2, y2 ),
             this.getCell( x1, y2 )
-        ) / 4
+        ].map( point => {
+            if ( point !== null ) {
+                valid++
+                return point
+            }
+
+            //console.log( 'invalid point found', x1, y1, x2, y2 )
+            return point
+        })
+
+        return points.reduce( ( prev, num ) => prev + num ) / valid
     }
 
     getDiamondAverage( x, y, size ) {
         // left, right, top, bottom
-        return (
-            this.getCell( x - size, y ) +
-            this.getCell( x + size, y ) +
-            this.getCell( x, y - size ) +
+        let valid = 0
+        let points = [
+            this.getCell( x - size, y ),
+            this.getCell( x + size, y ),
+            this.getCell( x, y - size ),
             this.getCell( x, y + size )
-        ) / 4
+        ].map( point => {
+            if ( point !== null ) {
+                valid++
+                return point
+            }
+
+            //console.log( 'invalid point found for diamond at', x, y, size )
+            return point
+        })
+
+        return points.reduce( ( prev, num ) => prev + num ) / valid
     }
 
     getCell( x, y ) {
-        //let cell = this.grid[ this.wrap( x ) ][ this.wrap( y ) ]
-        let cell = this.grid[ this.clamp( x ) ][ this.clamp( y ) ]
-
-        return cell || 0
+        return this.props.useWrap === true
+            ? this.grid[ this.wrap( x ) ][ this.wrap( y ) ]
+            : this.grid[ this.clamp( x ) ][ this.clamp( y ) ]
     }
 
     setCell( x, y, value ) {
-        // this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
-        this.grid[ this.clamp( x ) ][ this.clamp( y ) ] = value
+        this.props.useWrap === true
+            ? this.grid[ this.wrap( x ) ][ this.wrap( y ) ] = value
+            : this.grid[ this.clamp( x ) ][ this.clamp( y ) ] = value
     }
 
     generate( step ) {
@@ -151,20 +176,15 @@ export default class DisplacementMap extends React.Component {
             x: x1 + size,
             y: y1 + size
         }
-        // let avg = this.getAverage( mid.x, mid.y, size )
+
         let avg = this.getSquareAverage( x1, y1, x2, y2 )
         //console.log( 'gen:square', x1, y1, x2, y2, mid.x, mid.y, size, ( avg + this.random( step ) ).toFixed( 2 ) )
-        // this.setCell( mid.x, mid.y, avg + this.random( step ) )
 
         this.setCell( mid.x, mid.y, avg )
     }
 
     generateDiamond( x1, y1, x2, y2, step ) {
         let size = ( x2 - x1 ) / 2
-        let mid = {
-            x: x1 + size,
-            y: y1 + size
-        }
 
         //console.log( 'gen:diamond', x1, y1, x2, y2 )
 
