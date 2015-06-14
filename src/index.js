@@ -15,7 +15,7 @@ export default class DisplacementMap {
         this.array[ this.to1d( 0, 0 ) ] = 255
         this.array[ this.to1d( 0, this.height - 1 ) ] = 255
         this.array[ this.to1d( this.width - 1, 0 ) ] = 255
-        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 255
+        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 127.5
 
         this.generate( 1 )
 
@@ -66,41 +66,65 @@ export default class DisplacementMap {
         )
     }
 
-     /**
-      * @param cb <function> iterator to call
-      * @param step <float> 0...1
-      */
-     iterate( cb, step ) {
-         let size = ( this.width - 1 ) * step
-         for ( let x = 0; x < this.width - 1; x += size ) {
-             for ( let y = 0; y < this.height - 1; y += size ) {
-                 cb( x, y, x + size, y + size, step )
-             }
-         }
-     }
+    /**
+     * Get average from a central point
+     */
+    getAvgPoint( x, y, size ) {
+        return this.getAvg(
+            this.get( x - size, y - size ),
+            this.get( x + size, y - size ),
+            this.get( x - size, y + size ),
+            this.get( x + size, y + size )
+        )
+    }
 
-     generate( step ) {
-         let dist = ( this.width - 1 ) * step
+    /**
+     * @param cb <function> iterator to call
+     * @param step <float> 0...1
+     */
+    iterate( cb, step ) {
+        let size = ( this.width - 1 ) * step
+        for ( let x = 0; x < this.width - 1; x += size ) {
+            for ( let y = 0; y < this.height - 1; y += size ) {
+                cb( x, y, size )
+            }
+        }
+    }
+
+    generate( step ) {
+        let dist = ( this.width - 1 ) * step
 
          //  this.iterate( function( x1, y1, x2, y2 ) {
          //      console.log( x1, y1, x2, y2 )
          //      this.set( x1, y1, 127 )
          //  }.bind( this ), step )
-         this.iterate( this.generateSquare, step )
+        this.iterate( this.generateSquare, step )
+        this.iterate( this.generateDiamond, step )
 
 
-         if ( dist > 2 ) {
-             this.generate( step / 2 )
-         }
-     }
+        if ( dist > 2 ) {
+            this.generate( step / 2 )
+        }
+    }
 
-     generateSquare = ( x1, y1, x2, y2, step ) => {
-         console.log( 'square', x1, y1, x2, y2 )
-         let mid = ~~( x2 - x1 ) / 2
-         let avg = this.getAvgCorner( x1, y1, x2, y2 )
-         this.set( x1 + mid, y1 + mid, avg )
-     }
+    generateSquare = ( x, y, size ) => {
+        let mid = size / 2
+        let avg = this.getAvgCorner( x, y, x + size, y + size )
+        this.set( x + mid, y + mid, avg )
+    }
 
+    generateDiamond = ( x, y, size ) => {
+        let mid = size / 2
+
+        let setCell = function( xx, yy ) {
+            this.set( xx, yy, this.getAvgPoint( xx, yy ) )
+        }.bind( this )
+
+        setCell( x + mid, y )
+        setCell( x + mid, y + size )
+        setCell( x, y + mid )
+        setCell( x + size, y + mid )
+    }
 
     /*-----------------------------------------------------------*
      *
