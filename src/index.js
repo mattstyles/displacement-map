@@ -8,14 +8,16 @@ export default class DisplacementMap {
         this.width = options.width || 65
         this.height = options.height || 65
 
+        this.smoothness = 2.75
+
         this.buffer = new ArrayBuffer( this.width * this.height )
         this.array = new Uint8Array( this.buffer )
 
         // Seed corners
-        this.array[ this.to1d( 0, 0 ) ] = 255
-        this.array[ this.to1d( 0, this.height - 1 ) ] = 255
-        this.array[ this.to1d( this.width - 1, 0 ) ] = 255
-        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 127.5
+        this.array[ this.to1d( 0, 0 ) ] = 127
+        this.array[ this.to1d( 0, this.height - 1 ) ] = 127
+        this.array[ this.to1d( this.width - 1, 0 ) ] = 127
+        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 127
 
         this.generate( 1 )
 
@@ -42,6 +44,14 @@ export default class DisplacementMap {
       */
     variance() {
         return -127 + ( Math.random() * 255 )
+    }
+
+    /**
+     * Total variance * smoothness * step
+     * Step decreases with each fold to produce a better result
+     */
+    getMidpointDisplacement( size ) {
+        return this.variance() * this.smoothness * ( size / ( this.width - 1 ) )
     }
 
     /**
@@ -116,7 +126,7 @@ export default class DisplacementMap {
     generateSquare = ( x, y, size ) => {
         let mid = size / 2
         let avg = this.getAvgCorner( x, y, x + size, y + size )
-        this.set( x + mid, y + mid, avg + ( this.variance() * size / ( this.width - 1 ) ) )
+        this.set( x + mid, y + mid, avg + this.getMidpointDisplacement( size ) )
     }
 
     generateDiamond = ( x, y, size ) => {
@@ -125,7 +135,7 @@ export default class DisplacementMap {
         let setCell = function( xx, yy ) {
             let avg = this.getAvgPoint( xx, yy, mid )
             //console.log( 'setting diamond point', xx, yy, avg, 'for', x, y, size )
-            this.set( xx, yy, avg + ( this.variance() * size / ( this.width - 1 ) ) )
+            this.set( xx, yy, avg + this.getMidpointDisplacement( size ) )
         }.bind( this )
 
         setCell( x + mid, y )
