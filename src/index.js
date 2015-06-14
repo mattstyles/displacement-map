@@ -28,7 +28,7 @@ export default class DisplacementMap {
     }
 
     set( x, y, value ) {
-        this.array[ this.to1d( this.wrap( x ), this.wrap( y ) ) ] = this.clamp( value )
+        this.array[ this.to1d( this.wrap( x ), this.wrap( y ) ) ] = this.clamp255( value )
     }
 
     /*-----------------------------------------------------------*
@@ -71,10 +71,10 @@ export default class DisplacementMap {
      */
     getAvgPoint( x, y, size ) {
         return this.getAvg(
-            this.get( x - size, y - size ),
-            this.get( x + size, y - size ),
-            this.get( x - size, y + size ),
-            this.get( x + size, y + size )
+            this.get( x, y - size ),
+            this.get( x + size, y ),
+            this.get( x - size, y ),
+            this.get( x, y + size )
         )
     }
 
@@ -94,10 +94,6 @@ export default class DisplacementMap {
     generate( step ) {
         let dist = ( this.width - 1 ) * step
 
-         //  this.iterate( function( x1, y1, x2, y2 ) {
-         //      console.log( x1, y1, x2, y2 )
-         //      this.set( x1, y1, 127 )
-         //  }.bind( this ), step )
         this.iterate( this.generateSquare, step )
         this.iterate( this.generateDiamond, step )
 
@@ -117,7 +113,9 @@ export default class DisplacementMap {
         let mid = size / 2
 
         let setCell = function( xx, yy ) {
-            this.set( xx, yy, this.getAvgPoint( xx, yy ) )
+            let avg = this.getAvgPoint( xx, yy, mid )
+            //console.log( 'setting diamond point', xx, yy, avg, 'for', x, y, size )
+            this.set( xx, yy, avg )
         }.bind( this )
 
         setCell( x + mid, y )
@@ -142,15 +140,43 @@ export default class DisplacementMap {
     /**
      * Wraps 0...255 i.e. 257 becomes 1 (because 0 is important)
      */
-    wrap( value ) {
+    wrap255( value ) {
         return value & 0xff
+    }
+
+    /**
+     * Wraps 0...this.width - 1
+     */
+    // wrap( value ) {
+    //     return value & ( this.width - 1 )
+    // }
+    wrap( num ) {
+        let min = 0
+        let max = this.width - 1
+
+        if ( num > max ) {
+            return num % max
+        }
+
+        if ( num < min ) {
+            return max - ( ( min - num ) % ( max - min ) )
+        }
+
+        return num
     }
 
     /**
      * Clamps to 0...255
      */
-    clamp( value ) {
+    clamp255( value ) {
         return Math.max( Math.min( value, 255 ), 0 )
+    }
+
+    /**
+     * Clamps 0....this.width - 1
+     */
+    clamp( value ) {
+        return Math.max( Math.min( value, this.width - 1 ), 0 )
     }
 
 }
