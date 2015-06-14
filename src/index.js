@@ -37,6 +37,16 @@ export default class DisplacementMap {
      *
      *-----------------------------------------------------------*/
 
+     /**
+      * Returns +-127
+      */
+    variance() {
+        return -127 + ( Math.random() * 255 )
+    }
+
+    /**
+     * Averages (mean) all values passed as args
+     */
     getAvg() {
         return Array.prototype.reduce.call( arguments, ( prev, num ) => prev + num ) / arguments.length
     }
@@ -106,7 +116,7 @@ export default class DisplacementMap {
     generateSquare = ( x, y, size ) => {
         let mid = size / 2
         let avg = this.getAvgCorner( x, y, x + size, y + size )
-        this.set( x + mid, y + mid, avg )
+        this.set( x + mid, y + mid, avg + ( this.variance() * size / ( this.width - 1 ) ) )
     }
 
     generateDiamond = ( x, y, size ) => {
@@ -115,7 +125,7 @@ export default class DisplacementMap {
         let setCell = function( xx, yy ) {
             let avg = this.getAvgPoint( xx, yy, mid )
             //console.log( 'setting diamond point', xx, yy, avg, 'for', x, y, size )
-            this.set( xx, yy, avg )
+            this.set( xx, yy, avg + ( this.variance() * size / ( this.width - 1 ) ) )
         }.bind( this )
 
         setCell( x + mid, y )

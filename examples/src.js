@@ -1,9 +1,9 @@
 
 import Map from '../lib'
 
-const WIDTH = 513
-const HEIGHT = 513
-const CELL_SIZE = 1
+const WIDTH = 257
+const HEIGHT = 257
+const CELL_SIZE = 2
 
 let map = new Map({
     width: WIDTH,
