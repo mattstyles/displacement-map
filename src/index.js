@@ -22,32 +22,35 @@ export default class Generator {
     }
 
     generate() {
-        let fn = workerString
-        let blob = new Blob( [ fn ] )
-        let URI = window.URL.createObjectURL( blob )
-        let worker = new window.Worker( URI )
+        return new Promise( ( resolve, reject ) => {
+            let fn = workerString
+            let blob = new Blob( [ fn ] )
+            let URI = window.URL.createObjectURL( blob )
+            let worker = new window.Worker( URI )
 
-        worker.onmessage = event => {
-            console.log( 'received msg from worker' )
-            console.log( event.data )
-            console.log( event.data.buffer )
-            console.log( event.data.array )
-        }
+            worker.onmessage = event => {
+                console.log( 'received msg from worker' )
+                console.log( event.data.msg )
+                console.log( event.data.array )
 
-        let options = this.opts
-        worker.postMessage({
-            options: options,
-            seed: [
-                { x: 0, y: 0, value: 0x80 },
-                { x: options.width - 1, y: 0, value: 0x80 },
-                { x: 0, y: options.height - 1, value: 0x80 },
-                { x: options.width - 1, y: options.height - 1, value: 0x80 }
-            ]
+                // For now just map worker generated map straight on to this map
+                // @TODO check how this plays with the buffer, probably needs a fromArray method
+                this.map.array = event.data.array
+
+                resolve()
+            }
+
+            let options = this.opts
+            worker.postMessage({
+                options: options,
+                seed: [
+                    { x: 0, y: 0, value: 0x80 },
+                    { x: options.width - 1, y: 0, value: 0x80 },
+                    { x: 0, y: options.height - 1, value: 0x80 },
+                    { x: options.width - 1, y: options.height - 1, value: 0x80 }
+                ]
+            })
         })
-
-
-
-        return this.map.generate()
     }
 
     get() {

@@ -14,6 +14,4 @@ onmessage = function( event ) {
                 array: map.array
             })
         })
-
-    // postMessage( map.buffer )
 }
