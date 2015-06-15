@@ -12,24 +12,35 @@ export default class DisplacementMap {
 
         this.buffer = new ArrayBuffer( this.width * this.height )
         this.array = new Uint8Array( this.buffer )
-
-        // Seed corners
-        this.array[ this.to1d( 0, 0 ) ] = 0x80
-        this.array[ this.to1d( 0, this.height - 1 ) ] = 0x80
-        this.array[ this.to1d( this.width - 1, 0 ) ] = 0x80
-        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 0x80
-
-        this.generate( 1 )
-
-        console.log( this.array )
-
     }
 
-    get( x, y ) {
+    /**
+     * Enters a list of values into the array
+     * @param seeds <Array:Objects> seeds should contain x, y and value params
+     */
+    seed( seeds: Array ) {
+        //@TODO check valid seed objects
+        seeds.forEach( seed => {
+            this.array[ this.to1d( seed.x, seed.y ) ] = seed.value
+        })
+    }
+
+    /**
+     * Grabs a value from the array
+     * @param x <number> x coord
+     * @param y <number> y coord
+     */
+    get( x: number, y: number ) {
         return this.array[ this.to1d( this.wrap( x ), this.wrap( y ) ) ]
     }
 
-    set( x, y, value ) {
+    /**
+     * Sets a value within the array
+     * @param x <number> x coord
+     * @param y <number> y coord
+     * @param value <number> to set
+     */
+    set( x: number, y: number, value: number ) {
         this.array[ this.to1d( this.wrap( x ), this.wrap( y ) ) ] = this.clamp255( value )
     }
 
@@ -38,13 +49,6 @@ export default class DisplacementMap {
      *  Generation methods
      *
      *-----------------------------------------------------------*/
-
-     /**
-      * Returns +-127
-      */
-    variance() {
-        return -0x80 + ( Math.random() * 0xff )
-    }
 
     /**
      * Total variance * smoothness * step
@@ -111,8 +115,15 @@ export default class DisplacementMap {
         }
     }
 
+    /**
+     * Starts the generation
+     * @param step <float:optional> the step value or 1
+     */
     generate( step ) {
-        let dist = ( this.width - 1 ) * step
+        if ( !step ) {
+            step = 1
+        }
+        let dist = ( this.width - 1 ) * ( step )
 
         this.iterate( this.generateSquare, step )
         this.iterate( this.generateDiamond, step )
@@ -123,13 +134,25 @@ export default class DisplacementMap {
         }
     }
 
-    generateSquare = ( x, y, size ) => {
+    /**
+     * Performs the square step - generating a point in the center
+     * @param x <number> x component of top-left corner
+     * @param y <number> y component of top-left corner
+     * @param size <number> size of square to calculate mid-point of
+     */
+    generateSquare = ( x: number, y: number, size: number ) => {
         let mid = size / 2
         let avg = this.getAvgCorner( x, y, x + size, y + size )
         this.set( x + mid, y + mid, avg + this.getMidpointDisplacement( size ) )
     }
 
-    generateDiamond = ( x, y, size ) => {
+    /**
+     * Performs the diamond step - generating points at the edges
+     * @param x <number> x component of top-left corner
+     * @param y <number> y component of top-left corner
+     * @param size <number> size of square to calculate edges of
+     */
+    generateDiamond = ( x: number, y: number, size: number ) => {
         let mid = size / 2
 
         let setCell = function( xx, yy ) {
@@ -167,9 +190,6 @@ export default class DisplacementMap {
     /**
      * Wraps 0...this.width - 1
      */
-    // wrap( value ) {
-    //     return value & ( this.width - 1 )
-    // }
     wrap( num ) {
         let min = 0
         let max = this.width - 1
@@ -198,5 +218,13 @@ export default class DisplacementMap {
     clamp( value ) {
         return Math.max( Math.min( value, this.width - 1 ), 0 )
     }
+
+    /**
+     * Returns +-127
+     */
+    variance() {
+        return -0x80 + ( Math.random() * 0xff )
+    }
+
 
 }

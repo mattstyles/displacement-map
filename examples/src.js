@@ -1,16 +1,22 @@
 
 import Map from '../lib'
 
-const WIDTH = 257
-const HEIGHT = 257
-const CELL_SIZE = 3
+const WIDTH = 65
+const HEIGHT = 65
+const CELL_SIZE = 10
 
 let map = new Map({
     width: WIDTH,
     height: HEIGHT
 })
 
-window.map = map
+// Seed corners to half-weight
+map.seed([
+    { x: 0, y: 0, value: 0x80 },
+    { x: WIDTH - 1, y: 0, value: 0x80 },
+    { x: 0, y: HEIGHT - 1, value: 0x80 },
+    { x: WIDTH - 1, y: HEIGHT - 1, value: 0x80 }
+])
 
 let canvas = document.createElement( 'canvas' )
 canvas.classList.add( 'Surface', 'js-surface' )
@@ -23,13 +29,30 @@ function lerp( value ) {
     return 'rgba( 255, 255, 255, ' + ( value / 0xff ) + ' )'
 }
 
-
-for ( let x = 1; x < WIDTH - 1; x++ ) {
-    for (let y = 1; y < HEIGHT - 1; y++ ) {
-        ctx.fillStyle = lerp( map.get( x, y ) )
-        ctx.fillRect( x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE )
+function render() {
+    for ( let x = 1; x < WIDTH - 1; x++ ) {
+        for (let y = 1; y < HEIGHT - 1; y++ ) {
+            ctx.fillStyle = lerp( map.get( x, y ) )
+            ctx.fillRect( x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE )
+        }
     }
 }
 
+function generate() {
+    let start = window.performance.now()
+    map.generate()
+    let time = window.performance.now() - start
+    console.log( 'generation time', time.toFixed( 2 ), 'ms' )
+}
+
+
+generate()
+render()
+
 
 document.body.appendChild( canvas )
+
+
+window.render = render
+window.map = map
+window.generate = generate
