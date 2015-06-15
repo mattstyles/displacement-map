@@ -8,16 +8,16 @@ export default class DisplacementMap {
         this.width = options.width || 65
         this.height = options.height || 65
 
-        this.smoothness = 2.75
+        this.smoothness = 1
 
         this.buffer = new ArrayBuffer( this.width * this.height )
         this.array = new Uint8Array( this.buffer )
 
         // Seed corners
-        this.array[ this.to1d( 0, 0 ) ] = 127
-        this.array[ this.to1d( 0, this.height - 1 ) ] = 127
-        this.array[ this.to1d( this.width - 1, 0 ) ] = 127
-        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 127
+        this.array[ this.to1d( 0, 0 ) ] = 0x80
+        this.array[ this.to1d( 0, this.height - 1 ) ] = 0x80
+        this.array[ this.to1d( this.width - 1, 0 ) ] = 0x80
+        this.array[ this.to1d( this.width - 1, this.height - 1 ) ] = 0x80
 
         this.generate( 1 )
 
@@ -43,7 +43,7 @@ export default class DisplacementMap {
       * Returns +-127
       */
     variance() {
-        return -127 + ( Math.random() * 255 )
+        return -0x80 + ( Math.random() * 0xff )
     }
 
     /**

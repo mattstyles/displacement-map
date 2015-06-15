@@ -3,7 +3,7 @@ import Map from '../lib'
 
 const WIDTH = 257
 const HEIGHT = 257
-const CELL_SIZE = 2
+const CELL_SIZE = 3
 
 let map = new Map({
     width: WIDTH,
@@ -24,8 +24,8 @@ function lerp( value ) {
 }
 
 
-for ( let x = 0; x < WIDTH; x++ ) {
-    for (let y = 0; y < HEIGHT; y++ ) {
+for ( let x = 1; x < WIDTH - 1; x++ ) {
+    for (let y = 1; y < HEIGHT - 1; y++ ) {
         ctx.fillStyle = lerp( map.get( x, y ) )
         ctx.fillRect( x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE )
     }

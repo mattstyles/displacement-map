@@ -33,8 +33,7 @@
   },
   "homepage": "https://github.com/mattstyles/displacement-map",
   "license": "WTFPL",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel": "^5.5.7",
     "babel-eslint": "^3.1.15",
@@ -44,6 +43,7 @@
     "glob": "^5.0.10",
     "minimist": "^1.1.1",
     "serveur": "^1.1.4",
-    "tape": "^4.0.0"
+    "tape": "^4.0.0",
+    "watch": "^0.16.0"
   }
 }
