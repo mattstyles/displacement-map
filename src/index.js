@@ -1,6 +1,10 @@
 
-export default class DisplacementMap {
+import EventEmitter from 'events'
+
+export default class DisplacementMap extends EventEmitter {
     constructor( opts ) {
+        super()
+
         let options = opts || {}
 
         // Assign defaults or use opts
@@ -119,19 +123,39 @@ export default class DisplacementMap {
      * Starts the generation
      * @param step <float:optional> the step value or 1
      */
-    generate( step ) {
+    performStep( step ) {
         if ( !step ) {
             step = 1
         }
         let dist = ( this.width - 1 ) * ( step )
+
 
         this.iterate( this.generateSquare, step )
         this.iterate( this.generateDiamond, step )
 
 
         if ( dist > 2 ) {
-            this.generate( step / 2 )
+            this.performStep( step / 2 )
+            return
         }
+
+        this.emit( 'done' )
+    }
+
+    generate() {
+        return new Promise( ( resolve, reject ) => {
+            this.once( 'done', () => {
+                resolve()
+            })
+
+            try {
+                this.performStep( 1 )
+            } catch( err ) {
+                console.log( 'I heard an error' )
+                console.log( err )
+                reject( err )
+            }
+        })
     }
 
     /**

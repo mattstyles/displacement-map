@@ -41,13 +41,17 @@ function render() {
 function generate() {
     let start = window.performance.now()
     map.generate()
-    let time = window.performance.now() - start
-    console.log( 'generation time', time.toFixed( 2 ), 'ms' )
+        .then( () => {
+            let time = window.performance.now() - start
+            console.log( 'generation time', time.toFixed( 2 ), 'ms' )
+        })
+        .then( render )
+        .catch( err => console.log( err ) )
 }
 
 
 generate()
-render()
+//render()
 
 
 document.body.appendChild( canvas )
