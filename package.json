@@ -1,6 +1,6 @@
 {
   "name": "displacement-map",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Mid-point displacement map",
   "scripts": {
     "test": "tape ./spec",
