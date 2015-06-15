@@ -1,8 +1,11 @@
 
 import Map from './map'
 
-
-var workerString = ''/* Build:Worker */
+/**
+ * WorkerString magic - regex replaces this empty string with built worker code string
+ * @TODO this is fragile and will need some love
+ */
+var workerString = ''
 
 
 export default class Generator {
@@ -19,41 +22,27 @@ export default class Generator {
     }
 
     generate() {
-
-        console.log( workerString )
-
-        function start( event ) {
-            setTimeout( () => {
-                postMessage( 'I have finished' )
-            }, 1000 )
-
-            console.log( event.data.map )
-        }
-
-        // let fn = 'onmessage = ' + workerString
         let fn = workerString
-        //let fn = 'onmessage = ' + start.toString()
         let blob = new Blob( [ fn ] )
         let URI = window.URL.createObjectURL( blob )
         let worker = new window.Worker( URI )
 
         worker.onmessage = event => {
             console.log( 'received msg from worker' )
-            console.log( event )
+            console.log( event.data )
+            console.log( event.data.buffer )
+            console.log( event.data.array )
         }
 
         let options = this.opts
-        let map = new Map( options )
-        console.log( 'main: ', map )
         worker.postMessage({
-            // map: new Map( options )
-            // seed: [
-            //     { x: 0, y: 0, value: 0x80 },
-            //     { x: options.width - 1, y: 0, value: 0x80 },
-            //     { x: 0, y: options.height - 1, value: 0x80 },
-            //     { x: options.width - 1, y: options.height - 1, value: 0x80 }
-            // ],
-            map: 'hello world map'
+            options: options,
+            seed: [
+                { x: 0, y: 0, value: 0x80 },
+                { x: options.width - 1, y: 0, value: 0x80 },
+                { x: 0, y: options.height - 1, value: 0x80 },
+                { x: options.width - 1, y: options.height - 1, value: 0x80 }
+            ]
         })
 
 

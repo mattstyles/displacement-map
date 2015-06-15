@@ -3,10 +3,17 @@
 import Map from '../src/map'
 
 onmessage = function( event ) {
-    var map = new Map({
-        width: 9,
-        height: 9
-    })
+    var map = new Map( event.data.options )
 
-    postMessage( 'done creating a map in worker' )
+    map.seed( event.data.seed )
+    map.generate()
+        .then( () => {
+            postMessage({
+                msg: '200 OK',
+                buffer: map.buffer,
+                array: map.array
+            })
+        })
+
+    // postMessage( map.buffer )
 }
