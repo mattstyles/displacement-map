@@ -5,3 +5,5 @@ dist
 **/*.test.js
 **/__tests__
 **/__test__
+src
+spec

@@ -2,6 +2,7 @@
   "name": "displacement-map",
   "version": "0.1.0",
   "description": "Mid-point displacement map",
+  "main": "lib",
   "scripts": {
     "test": "tape ./spec",
     "pretest": "npm run build",
