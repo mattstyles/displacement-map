@@ -44,6 +44,7 @@
     "browserify": "^10.2.4",
     "eslint": "^0.22.1",
     "glob": "^5.0.10",
+    "lodash.range": "^3.0.0",
     "minimist": "^1.1.1",
     "serveur": "^1.1.4",
     "tape": "^4.0.0",

@@ -149,7 +149,9 @@ export default class DisplacementMap extends EventEmitter {
      */
     generate() {
         return new Promise( ( resolve, reject ) => {
-            this.once( 'done', resolve )
+            this.once( 'done', event => {
+                resolve( this.array )
+            })
 
             try {
                 this.performStep( 1 )

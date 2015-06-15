@@ -7,37 +7,39 @@ import Map from './map'
  */
 var workerString = ''
 
+var workerblob = new Blob( [ workerString ] )
+var workerURI = window.URL.createObjectURL( workerblob )
+
 
 export default class Generator {
     constructor( opts ) {
 
         this.opts = opts
-        this.map = new Map( this.opts )
-        this.map.seed([
-            { x: 0, y: 0, value: 0x80 },
-            { x: this.opts.width - 1, y: 0, value: 0x80 },
-            { x: 0, y: this.opts.height - 1, value: 0x80 },
-            { x: this.opts.width - 1, y: this.opts.height - 1, value: 0x80 }
-        ])
+        // this.map = new Map( this.opts )
+        // this.map.seed([
+        //     { x: 0, y: 0, value: 0x80 },
+        //     { x: this.opts.width - 1, y: 0, value: 0x80 },
+        //     { x: 0, y: this.opts.height - 1, value: 0x80 },
+        //     { x: this.opts.width - 1, y: this.opts.height - 1, value: 0x80 }
+        // ])
     }
 
     generate() {
         return new Promise( ( resolve, reject ) => {
-            let fn = workerString
-            let blob = new Blob( [ fn ] )
-            let URI = window.URL.createObjectURL( blob )
-            let worker = new window.Worker( URI )
+            let worker = new window.Worker( workerURI )
 
             worker.onmessage = event => {
-                console.log( 'received msg from worker' )
-                console.log( event.data.msg )
-                console.log( event.data.array )
+                // console.log( 'received msg from worker' )
+                console.log( 'worker status:', event.data.msg )
+                // console.log( event.data.array )
 
                 // For now just map worker generated map straight on to this map
                 // @TODO check how this plays with the buffer, probably needs a fromArray method
-                this.map.array = event.data.array
+                // this.map.array = event.data.array
 
-                resolve()
+                worker.terminate()
+
+                resolve( event.data.array )
             }
 
             let options = this.opts
