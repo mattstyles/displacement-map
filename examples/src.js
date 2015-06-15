@@ -11,12 +11,12 @@ let map = new Map({
 })
 
 // Seed corners to half-weight
-map.seed([
-    { x: 0, y: 0, value: 0x80 },
-    { x: WIDTH - 1, y: 0, value: 0x80 },
-    { x: 0, y: HEIGHT - 1, value: 0x80 },
-    { x: WIDTH - 1, y: HEIGHT - 1, value: 0x80 }
-])
+// map.seed([
+//     { x: 0, y: 0, value: 0x80 },
+//     { x: WIDTH - 1, y: 0, value: 0x80 },
+//     { x: 0, y: HEIGHT - 1, value: 0x80 },
+//     { x: WIDTH - 1, y: HEIGHT - 1, value: 0x80 }
+// ])
 
 let canvas = document.createElement( 'canvas' )
 canvas.classList.add( 'Surface', 'js-surface' )

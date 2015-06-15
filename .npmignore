@@ -7,3 +7,4 @@ dist
 **/__test__
 src
 spec
+examples
