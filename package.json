@@ -4,7 +4,7 @@
   "description": "Mid-point displacement map",
   "main": "lib",
   "scripts": {
-    "test": "tape ./spec",
+    "test": "tape ./spec ./src/*.test.js*",
     "pretest": "npm run build",
     "lint": "eslint ./src/*",
     "clean": "rm -rf lib && mkdir lib",
