@@ -200,7 +200,7 @@ function generate( step ) {
 
 
 
-this.addEventListener( 'message', function( event ) {
+self.addEventListener( 'message', function( event ) {
     map = event.data.map
     height = event.data.height
     width = event.data.width
@@ -211,7 +211,7 @@ this.addEventListener( 'message', function( event ) {
 })
 
 function done() {
-    this.postMessage({
+    self.postMessage({
         map: map
     })
 }
