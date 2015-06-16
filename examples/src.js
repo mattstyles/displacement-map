@@ -1,3 +1,13 @@
+// Start rotation to check for jank
+var icon = document.querySelector( '.js-icon' )
+var rotate = 0
+var animate = function() {
+    icon.style.transform = 'rotate( ' + rotate + 'deg )'
+    rotate = ( rotate + 1 ) % 360
+    requestAnimationFrame( animate )
+}
+animate()
+
 
 import MapGenerator from '../lib'
 import range from 'lodash.range'
@@ -49,8 +59,7 @@ function generate() {
             let time = window.performance.now() - start
             console.log( 'generation time', time.toFixed( 2 ), 'ms' )
 
-            // window.arr = arr
-            // render( arr )
+            render( res[ 0 ] )
         })
 }
 
