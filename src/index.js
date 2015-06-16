@@ -1,5 +1,4 @@
 
-import Map from './map'
 
 /**
  * WorkerString magic - regex replaces this empty string with built worker code string
@@ -15,28 +14,14 @@ export default class Generator {
     constructor( opts ) {
 
         this.opts = opts
-        // this.map = new Map( this.opts )
-        // this.map.seed([
-        //     { x: 0, y: 0, value: 0x80 },
-        //     { x: this.opts.width - 1, y: 0, value: 0x80 },
-        //     { x: 0, y: this.opts.height - 1, value: 0x80 },
-        //     { x: this.opts.width - 1, y: this.opts.height - 1, value: 0x80 }
-        // ])
     }
 
-    generate() {
+    generate( opts ) {
         return new Promise( ( resolve, reject ) => {
             let worker = new window.Worker( workerURI )
 
             worker.onmessage = event => {
-                // console.log( 'received msg from worker' )
-                console.log( 'worker status:', event.data.msg )
-                // console.log( event.data.array )
-
-                // For now just map worker generated map straight on to this map
-                // @TODO check how this plays with the buffer, probably needs a fromArray method
-                // this.map.array = event.data.array
-
+                console.log( 'worker status:', event.data )
                 worker.terminate()
 
                 resolve( event.data.array )
@@ -44,7 +29,9 @@ export default class Generator {
 
             let options = this.opts
             worker.postMessage({
-                options: options,
+                map: opts.map,
+                width: opts.width,
+                height: opts.height,
                 seed: [
                     { x: 0, y: 0, value: 0x80 },
                     { x: options.width - 1, y: 0, value: 0x80 },
@@ -54,9 +41,4 @@ export default class Generator {
             })
         })
     }
-
-    get() {
-        return this.map.get( ...arguments )
-    }
-
 }

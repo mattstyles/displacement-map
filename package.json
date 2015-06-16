@@ -10,14 +10,15 @@
     "clean": "rm -rf lib && mkdir lib",
     "build": "babel src --out-dir lib",
     "prebuild": "npm run clean",
-    "postbuild": "browserify -t babelify workers/generate.js | uglifyjs --compress --mangle > lib/worker-bundle.js && npm run build:worker",
+    "postbuild": "npm run build:worker",
     "watch": "watch 'npm run build && npm run build:examples' src",
     "prepublish": "npm run build",
     "preexamples": "npm run build",
     "serve": "serveur -cJSo examples",
     "build:examples": "browserify ./examples/src.js -d -t babelify > ./examples/build.js",
     "examples": "npm run build:examples && npm run serve",
-    "build:worker": "babel-node ./bin/buildWorker"
+    "build:worker": "babel workers/displacement.js | uglifyjs --compress --mangle > lib/displacementWorker.js",
+    "postbuild:worker": "babel-node bin/inlineWorker.js"
   },
   "keywords": [
     "displacement",
