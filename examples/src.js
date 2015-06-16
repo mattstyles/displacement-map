@@ -8,6 +8,11 @@ var animate = function() {
 }
 animate()
 
+document.querySelector( '.js-btnGenerate' ).addEventListener( 'click', function() {
+    console.log( 'generating...' )
+    generate()
+})
+
 
 import MapGenerator from '../lib'
 import range from 'lodash.range'
