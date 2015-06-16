@@ -17,25 +17,29 @@ document.querySelector( '.js-btnGenerate' ).addEventListener( 'click', function(
 import MapGenerator from '../lib'
 import range from 'lodash.range'
 
-const WIDTH = 0x41
-const HEIGHT = 0x41
-const CELL_SIZE = 10
+const WIDTH = 0x101
+const HEIGHT = 0x101
+const CELL_SIZE = 2
 const THREADS = 4
 
 let mapGenerator = new MapGenerator()
 
 let canvas = document.createElement( 'canvas' )
+let ctx = canvas.getContext( '2d' )
 canvas.classList.add( 'Surface', 'js-surface' )
 canvas.setAttribute( 'width', WIDTH * CELL_SIZE )
 canvas.setAttribute( 'height', HEIGHT * CELL_SIZE )
 
-let ctx = canvas.getContext( '2d' )
+document.body.appendChild( canvas )
 
+
+// Color interp
 function lerp( value ) {
     return 'rgba( 255, 255, 255, ' + ( value / 0xff ) + ' )'
 }
 
 function render( arr ) {
+    ctx.clearRect( 0, 0, WIDTH * CELL_SIZE, HEIGHT * CELL_SIZE )
     for (let y = 0; y < HEIGHT; y++ ) {
         for ( let x = 0; x < WIDTH; x++ ) {
             ctx.fillStyle = lerp( arr[ ( y * WIDTH ) + x ] )
@@ -67,12 +71,6 @@ function generate() {
             render( res[ 0 ] )
         })
 }
-
-
-generate()
-
-
-document.body.appendChild( canvas )
 
 
 window.render = render
