@@ -7,8 +7,11 @@
 var displacementLineWorkerString = ''
 var displacementMapWorkerString = ''
 
-var workerblob = new Blob( [ displacementMapWorkerString ] )
-var workerURI = window.URL.createObjectURL( workerblob )
+var mapBlob = new Blob( [ displacementMapWorkerString ] )
+var mapURI = window.URL.createObjectURL( mapBlob )
+
+var lineBlob = new Blob( [ displacementLineWorkerString ] )
+var lineURI = window.URL.createObjectURL( lineBlob )
 
 
 export default class Generator {
@@ -19,7 +22,7 @@ export default class Generator {
 
     generate( opts ) {
         return new Promise( ( resolve, reject ) => {
-            let worker = new window.Worker( workerURI )
+            let worker = new window.Worker( mapURI )
 
             worker.onmessage = event => {
                 console.log( 'worker status:', event.data )
@@ -32,6 +35,23 @@ export default class Generator {
                 map: opts.map,
                 width: opts.width,
                 height: opts.height
+            })
+        })
+    }
+
+    generateLine( opts ) {
+        return new Promise( ( resolve, reject ) => {
+            let worker = new window.Worker( lineURI )
+
+            worker.onmessage = event => {
+                console.log( 'line worker status', event.data )
+                worker.terminate()
+
+                resolve( event.data.buf8 )
+            }
+
+            worker.postMessage({
+                buf8: opts.buf8
             })
         })
     }

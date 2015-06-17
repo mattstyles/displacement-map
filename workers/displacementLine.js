@@ -12,6 +12,11 @@
 var buf8
 
 
+function clamp( num ) {
+    return Math.min( Math.max( num, 0 ), 0xff )
+}
+
+
 function variance() {
     return -0x80 + ( Math.random() * 0xff )
 }
@@ -24,7 +29,8 @@ function generateMidpoint( start, end ) {
     // Take average of 2 end points of segment
     // * 1 is a smoothness/roughness variable
     // variance decreases as segment length decreases
-    buf8[ middle ] = avg * 1 + ( variance() * ( end - start ) / buf8.length - 1 )
+    // Uint8Array will restrict to 0 < x < 255 but it'll wrap, we need to clamp
+    buf8[ middle ] = clamp( avg * 1 + ( variance() * ( end - start ) / buf8.length - 1 ) * .5 )
 }
 
 
@@ -33,7 +39,7 @@ function generate( step ) {
         step = 1
     }
 
-    var size = ( buf8.length - 1 ) / step
+    var size = ( buf8.length - 1 ) * step
 
     for ( var i = 0; i < buf8.length - 1; i += size ) {
         generateMidpoint( i, i + size )
@@ -56,7 +62,7 @@ self.addEventListener( 'message', function( event ) {
 })
 
 function done() {
-    self.postMesssage({
+    self.postMessage({
         buf8: buf8
     })
 }

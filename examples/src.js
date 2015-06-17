@@ -17,8 +17,8 @@ document.querySelector( '.js-btnGenerate' ).addEventListener( 'click', function(
 import MapGenerator from '../lib'
 import range from 'lodash.range'
 
-const WIDTH = 0x101
-const HEIGHT = 0x101
+const WIDTH = 0x41
+const HEIGHT = 0x41
 const CELL_SIZE = 2
 const THREADS = 4
 
@@ -69,6 +69,15 @@ function generate() {
             console.log( 'generation time', time.toFixed( 2 ), 'ms' )
 
             render( res[ 0 ] )
+        })
+
+
+    mapGenerator.generateLine({
+        buf8: new Uint8Array( 0x5 )
+    })
+        .then( res => {
+            console.log( 'line generation done' )
+            console.log( res )
         })
 }
 
