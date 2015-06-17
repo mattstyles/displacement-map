@@ -17,7 +17,8 @@
     "serve": "serveur -cJSo examples",
     "build:examples": "browserify ./examples/src.js -d -t babelify > ./examples/build.js",
     "examples": "npm run build:examples && npm run serve",
-    "build:worker": "babel workers/displacement.js | uglifyjs > lib/displacementWorker.js",
+    "prebuild:worker": "babel workers/displacementLine.js | uglifyjs > lib/displacementLineWorker.js",
+    "build:worker": "babel workers/displacementMap.js | uglifyjs > lib/displacementMapWorker.js",
     "postbuild:worker": "babel-node bin/inlineWorker.js"
   },
   "keywords": [

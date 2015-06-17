@@ -3,23 +3,25 @@
 
 import fs from 'fs'
 import path from 'path'
-import parse from 'minimist'
 
-let argv = parse( process.argv.slice( 2 ) )
 
-// -w input worker file
-// -t file to transform
+function inlineWorker( worker, output ) {
+    let workerFile = fs.readFileSync( path.resolve( worker ), 'utf8' )
+    let file = fs.readFileSync( path.resolve( output ), 'utf8' )
 
-let worker = fs.readFileSync( path.resolve( './lib/displacementWorker.js' ), 'utf8' )
-let file = fs.readFileSync( path.resolve( './lib/index.js' ), 'utf8' )
+    // Replace quotes in code
+    let escaped = workerFile.replace( /\'/g, '\\\'' )
 
-// Replace quotes in code
-let escaped = worker.replace( /\'/g, '\\\'' )
+    // Wrap code in quotes to make a string
+    let replaceString = path.basename( worker, '.js' ) + 'String'
+    let replaced = file.replace( replaceString + ' = \'\'', replaceString + ' = \'' + escaped + '\'' )
 
-// Wrap code in quotes to make a string
-let replaced = file.replace( 'workerString = \'\'', 'workerString = \'' + escaped + '\'' )
+    // Regex replace magic line with wrapped code string ready for worker to execute
+    fs.writeFileSync( path.resolve( output ), replaced, 'utf8' )
 
-// Regex replace magic line with wrapped code string ready for worker to execute
-fs.writeFileSync( path.join( __dirname, '../lib/index.js' ), replaced, 'utf8' )
+    console.log( '  worker inlined', worker )
+}
 
-console.log( '  worker inlined' )
+
+inlineWorker( './lib/displacementMapWorker.js', './lib/index.js' )
+inlineWorker( './lib/displacementLineWorker.js', './lib/index.js' )
