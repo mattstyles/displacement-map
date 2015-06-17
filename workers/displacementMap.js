@@ -72,7 +72,7 @@ function variance() {
  * Step decreases with each fold to produce a better result
  */
 function getMidpointDisplacement( size ) {
-    return clamp( variance() * 1 * ( size / ( width - 1 ) ) )
+    return clamp( .5 * variance() * 1 * ( size / ( width - 1 ) ) )
 }
 
 /**
