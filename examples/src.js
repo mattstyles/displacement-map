@@ -17,25 +17,37 @@ document.querySelector( '.js-btnGenerate' ).addEventListener( 'click', function(
 import MapGenerator from '../lib'
 import range from 'lodash.range'
 
-const WIDTH = 0x41
-const HEIGHT = 0x41
-const CELL_SIZE = 2
+const WIDTH = 0x9
+const HEIGHT = 0x9
+const CELL_SIZE = 70
 const THREADS = 4
 
 let mapGenerator = new MapGenerator()
 
+// Map canvas
 let canvas = document.createElement( 'canvas' )
 let ctx = canvas.getContext( '2d' )
 canvas.classList.add( 'Surface', 'js-surface' )
 canvas.setAttribute( 'width', WIDTH * CELL_SIZE )
 canvas.setAttribute( 'height', HEIGHT * CELL_SIZE )
-
 document.body.appendChild( canvas )
 
+// Line canvas
+let canvas2 = document.createElement( 'canvas' )
+let ctx2 = canvas2.getContext( '2d' )
+canvas2.classList.add( 'Surface', 'js-surface' )
+canvas2.setAttribute( 'width', WIDTH * CELL_SIZE )
+canvas2.setAttribute( 'height', HEIGHT * CELL_SIZE )
+document.body.appendChild( canvas2 )
 
 // Color interp
 function lerp( value ) {
     return 'rgba( 255, 255, 255, ' + ( value / 0xff ) + ' )'
+}
+
+function lerpRed( value ) {
+    // 128-255
+    return 'rgba( ' + ~~( 0x80 + ( ( value * 0xff ) / 2 ) ) + ', 0, 0, 1 )'
 }
 
 function render( arr ) {
@@ -45,6 +57,14 @@ function render( arr ) {
             ctx.fillStyle = lerp( arr[ ( y * WIDTH ) + x ] )
             ctx.fillRect( x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE )
         }
+    }
+}
+
+function renderLine( arr ) {
+    ctx2.clearRect( 0, 0, WIDTH * CELL_SIZE, HEIGHT * CELL_SIZE )
+    for ( let i = 0; i < WIDTH; i++ ) {
+        ctx2.fillStyle = lerpRed( i / WIDTH )
+        ctx2.fillRect( i * CELL_SIZE, 0, CELL_SIZE, arr[ i ] / 0xff * ( HEIGHT * CELL_SIZE ) )
     }
 }
 
@@ -71,13 +91,17 @@ function generate() {
             render( res[ 0 ] )
         })
 
-
+    let lineBuf = new Uint8Array( WIDTH )
+    lineBuf[ 0 ] = 0x80
+    lineBuf[ WIDTH - 1 ] = 0x80
     mapGenerator.generateLine({
-        buf8: new Uint8Array( 0x5 )
+        buf8: lineBuf
     })
         .then( res => {
             console.log( 'line generation done' )
             console.log( res )
+
+            renderLine( res )
         })
 }
 

@@ -25,7 +25,7 @@ function variance() {
 function generateMidpoint( start, end ) {
     var length = end - start
     var avg = ( buf8[ end ] + buf8[ start ] ) / 2
-    var displacement = variance() * ( length / buf8.length - 1 )
+    var displacement = .5 * variance() * ( length / buf8.length - 1 )
 
     // Take average of 2 end points of segment
     // * 1 is a smoothness/roughness variable
