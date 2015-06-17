@@ -17,9 +17,9 @@ document.querySelector( '.js-btnGenerate' ).addEventListener( 'click', function(
 import MapGenerator from '../lib'
 import range from 'lodash.range'
 
-const WIDTH = 0x9
-const HEIGHT = 0x9
-const CELL_SIZE = 70
+const WIDTH = 0x101
+const HEIGHT = 0x101
+const CELL_SIZE = 2
 const THREADS = 4
 
 let mapGenerator = new MapGenerator()
@@ -73,7 +73,10 @@ function generate() {
 
     let buf = new ArrayBuffer( WIDTH * HEIGHT )
     let buf8 = new Uint8Array( buf )
-    buf8[ 0 ] = 0xff
+    buf8[ 0 ] = 0x80
+    buf8[ WIDTH - 1 ] = 0x80
+    buf8[ ( HEIGHT * WIDTH ) - WIDTH ] = 0x80
+    buf8[ ( HEIGHT * WIDTH ) - 1 ] = 0x80
 
     Promise.all( range( THREADS ).map( () => {
         return mapGenerator.generate({
