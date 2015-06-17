@@ -11,6 +11,10 @@
 
 var map, height, width
 
+function clamp( num ) {
+    return Math.min( Math.max( num, 0 ), 0xff )
+}
+
 function to1d( x, y ) {
     return ( y * width ) + x
 }
@@ -68,7 +72,7 @@ function variance() {
  * Step decreases with each fold to produce a better result
  */
 function getMidpointDisplacement( size ) {
-    return variance() * 1 * ( size / ( width - 1 ) )
+    return clamp( variance() * 1 * ( size / ( width - 1 ) ) )
 }
 
 /**

@@ -23,14 +23,15 @@ function variance() {
 
 
 function generateMidpoint( start, end ) {
-    var middle = ( end - start ) / 2
+    var length = end - start
     var avg = ( buf8[ end ] + buf8[ start ] ) / 2
+    var displacement = variance() * ( length / buf8.length - 1 )
 
     // Take average of 2 end points of segment
     // * 1 is a smoothness/roughness variable
     // variance decreases as segment length decreases
     // Uint8Array will restrict to 0 < x < 255 but it'll wrap, we need to clamp
-    buf8[ middle ] = clamp( avg * 1 + ( variance() * ( end - start ) / buf8.length - 1 ) * .5 )
+    buf8[ start + ( length / 2 ) ] = clamp( avg * 1 + displacement )
 }
 
 
@@ -46,7 +47,7 @@ function generate( step ) {
     }
 
     if ( size > 2 ) {
-        generate( size * .5 )
+        generate( step * .5 )
         return
     }
 
