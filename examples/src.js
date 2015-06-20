@@ -82,7 +82,8 @@ function generate() {
         return mapGenerator.generate({
             map: buf8,
             width: WIDTH,
-            height: HEIGHT
+            height: HEIGHT,
+            roughness: 1.25
         })
     }))
         .then( res => {
@@ -98,7 +99,8 @@ function generate() {
     lineBuf[ 0 ] = 0x80
     lineBuf[ WIDTH - 1 ] = 0x80
     mapGenerator.generateLine({
-        buf8: lineBuf
+        buf8: lineBuf,
+        roughness: 0.25
     })
         .then( res => {
             console.log( 'line generation done' )

@@ -17,7 +17,15 @@ var lineURI = window.URL.createObjectURL( lineBlob )
 export default class Generator {
     constructor( opts ) {
 
-        this.opts = opts
+        this.opts = opts || {}
+    }
+
+    debug() {
+        if ( !this.opts.debug ) {
+            return
+        }
+
+        console.log( ...arguments )
     }
 
     generate( opts ) {
@@ -25,7 +33,7 @@ export default class Generator {
             let worker = new window.Worker( mapURI )
 
             worker.onmessage = event => {
-                console.log( 'worker status:', event.data )
+                this.debug( 'worker status:', event.data )
                 worker.terminate()
 
                 resolve( event.data.map )
@@ -34,7 +42,8 @@ export default class Generator {
             worker.postMessage({
                 map: opts.map,
                 width: opts.width,
-                height: opts.height
+                height: opts.height,
+                roughness: opts.roughness
             })
         })
     }
@@ -44,14 +53,15 @@ export default class Generator {
             let worker = new window.Worker( lineURI )
 
             worker.onmessage = event => {
-                console.log( 'line worker status', event.data )
+                this.debug( 'line worker status', event.data )
                 worker.terminate()
 
                 resolve( event.data.buf8 )
             }
 
             worker.postMessage({
-                buf8: opts.buf8
+                buf8: opts.buf8,
+                roughness: opts.roughness
             })
         })
     }

@@ -9,7 +9,7 @@
  */
 
 
-var buf8
+var buf8, roughness
 
 
 function clamp( num ) {
@@ -25,10 +25,10 @@ function variance() {
 function generateMidpoint( start, end ) {
     var length = end - start
     var avg = ( buf8[ end ] + buf8[ start ] ) / 2
-    var displacement = .5 * variance() * ( length / buf8.length - 1 )
+    var displacement = .5 * variance() * roughness * ( length / buf8.length - 1 )
 
     // Take average of 2 end points of segment
-    // * 1 is a smoothness/roughness variable
+    // * 1 is a roughness/roughness variable
     // variance decreases as segment length decreases
     // Uint8Array will restrict to 0 < x < 255 but it'll wrap, we need to clamp
     buf8[ start + ( length / 2 ) ] = clamp( avg * 1 + displacement )
@@ -58,6 +58,7 @@ function generate( step ) {
 
 self.addEventListener( 'message', function( event ) {
     buf8 = event.data.buf8
+    roughness = event.data.roughness || 1
 
     generate()
 })

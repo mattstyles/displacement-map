@@ -9,7 +9,7 @@
  * @output Uint8Array
  */
 
-var map, height, width
+var map, height, width, roughness
 
 function clamp( num ) {
     return Math.min( Math.max( num, 0 ), 0xff )
@@ -68,11 +68,11 @@ function variance() {
 
 
 /**
- * Total variance * smoothness * step
+ * Total variance * roughness * step
  * Step decreases with each fold to produce a better result
  */
 function getMidpointDisplacement( size ) {
-    return clamp( variance() * 1 * ( size / ( width - 1 ) ) )
+    return clamp( variance() * roughness * ( size / ( width - 1 ) ) )
 }
 
 /**
@@ -208,6 +208,7 @@ self.addEventListener( 'message', function( event ) {
     map = event.data.map
     height = event.data.height
     width = event.data.width
+    roughness = event.data.roughness || 1
 
     //@TODO seed
 
